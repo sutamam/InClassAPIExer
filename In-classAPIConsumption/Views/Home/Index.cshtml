@@ -1,11 +1,25 @@
-﻿@{
+﻿@model In_classAPIConsumption.Models.Parks
+@{
     ViewData["Title"] = "Home Page";
 }
 
 <div class="text-center">
-    <h1 class="display-4">Below is the JSON data from data.gov api</h1>
+    <h1 class="display-4">Welcome to data.gov API</h1>
 </div>
 
 <div class="text-center">
     <h3>@ViewBag.explaination</h3>
+    <table border="1">
+        <tr>
+            <th>Park Code</th>
+            <th>Park Name</th>
+            <th>State</th>
+            <th>Description</th>
+        </tr>
+        @foreach (In_classAPIConsumption.Models.Park park in Model.data)
+        {
+            //<h5> @(park.parkCode +" "+park.fullName +" "+ park.states)</h5>
+            <tr><td>@park.parkCode</td><td>@park.fullName</td><td>@park.states</td><td>@park.description</td></tr>
+        }
+    </table>
 </div>

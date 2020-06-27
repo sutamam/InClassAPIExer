@@ -17,8 +17,12 @@ namespace In_classAPIConsumption.Controllers
     {
         private readonly ILogger<HomeController> _logger;
 
-        String BASE_URL = "https://developer.nps.gov/api/v1/parks?parkCode=acad&api_key=2QOvudpqVXxRVoipbiY3VKhnRiBGtfz8b8aJwIfH";
+        //String BASE_URL = "https://developer.nps.gov/api/v1/parks?parkCode=acad&api_key=2QOvudpqVXxRVoipbiY3VKhnRiBGtfz8b8aJwIfH";
+
         HttpClient httpClient;
+
+        static string BASE_URL = "https://developer.nps.gov/api/v1/";
+        static string API_KEY = "2QOvudpqVXxRVoipbiY3VKhnRiBGtfz8b8aJwIfH"; //API key 
 
         public HomeController(ILogger<HomeController> logger)
         {
@@ -27,18 +31,44 @@ namespace In_classAPIConsumption.Controllers
 
         public IActionResult Index()
         {
-            httpClient = new HttpClient();
+      httpClient = new HttpClient();
+      httpClient.DefaultRequestHeaders.Accept.Clear();
+      httpClient.DefaultRequestHeaders.Add("X-Api-Key", API_KEY);
+      httpClient.DefaultRequestHeaders.Accept.Add(
+          new System.Net.Http.Headers.MediaTypeWithQualityHeaderValue("application/json"));
 
-            httpClient.BaseAddress = new Uri(BASE_URL);
-            HttpResponseMessage response = httpClient.GetAsync(BASE_URL).GetAwaiter().GetResult();
+      string NATIONAL_PARK_API_PATH = BASE_URL + "/parks?limit=20";
+      string parksData = "";
 
-            if(response.IsSuccessStatusCode)
-            {
-                ViewBag.explaination = response.Content.ReadAsStringAsync().GetAwaiter().GetResult();
-            }
+      Parks parks = null;
 
-  
-            return View();
+      httpClient.BaseAddress = new Uri(NATIONAL_PARK_API_PATH);
+
+      try
+      {
+        HttpResponseMessage response = httpClient.GetAsync(NATIONAL_PARK_API_PATH).GetAwaiter().GetResult();
+
+        if (response.IsSuccessStatusCode)
+        {
+          parksData = response.Content.ReadAsStringAsync().GetAwaiter().GetResult();
+          
+        }
+
+        if (!parksData.Equals(""))
+        {
+          // JsonConvert is part of the NewtonSoft.Json Nuget package
+          parks = JsonConvert.DeserializeObject<Parks>(parksData);
+
+          ViewBag.explaination = "Total parks received from Data.gov API: "+parks.total;
+        }
+      }
+      catch (System.Exception e)
+      {
+        // This is a useful place to insert a breakpoint and observe the error message
+        Console.WriteLine(e.Message);
+      }
+
+      return View(parks);
         }
 
         public IActionResult Privacy()
